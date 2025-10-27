@@ -3,23 +3,25 @@ import { Pool } from 'pg';
 /**
  * GraphQL Resolvers
  * Handles queries for the fantasy football locker room app
+ * Uses clubhouse-api database schema
  */
 
 export const resolvers = {
   Query: {
     /**
      * Get a user's roster with all slots and players
+     * Uses clubhouse-api database with team_id and roster_player tables
      */
     roster: async (_: any, { userId }: { userId: string }, { db }: { db: Pool }) => {
       try {
-        // Get roster
-        const rosterResult = await db.query(
-          'SELECT id, user_id FROM rosters WHERE user_id = $1',
+        // First, get the team_id from user_id (in clubhouse-api, user_id is the identifier)
+        const teamResult = await db.query(
+          `SELECT team_id, league_id, user_id, name FROM team WHERE user_id = $1 LIMIT 1`,
           [userId]
         );
 
-        if (rosterResult.rows.length === 0) {
-          // Return empty roster if user doesn't have one yet
+        if (teamResult.rows.length === 0) {
+          // Return empty roster if user doesn't have a team yet
           return {
             id: `roster-${userId}`,
             userId,
@@ -27,42 +29,47 @@ export const resolvers = {
           };
         }
 
-        const roster = rosterResult.rows[0];
+        const team = teamResult.rows[0];
+        const teamId = team.team_id;
+        const leagueId = team.league_id;
 
-        // Get all slots with players
-        const slotsResult = await db.query(
+        // Get all roster players for this team
+        const rosterResult = await db.query(
           `SELECT 
-            rs.slot,
-            p.id as player_id,
-            p.name,
-            p.position,
-            p.team,
-            p.avatar_sprite_key,
-            p.avatar_frame
-          FROM roster_slots rs
-          LEFT JOIN players p ON rs.player_id = p.id
-          WHERE rs.roster_id = $1
-          ORDER BY rs.slot`,
-          [roster.id]
+            rp.roster_player_id,
+            rp.roster_seat,
+            np.nfl_player_id,
+            np.name,
+            np.position,
+            nt.name as team_name,
+            nt.nfl_team_code
+          FROM roster_player rp
+          LEFT JOIN player p ON rp.player_id = p.player_id
+          LEFT JOIN nfl_player np ON p.nfl_player_id = np.nfl_player_id
+          LEFT JOIN nfl_team nt ON np.nfl_team_id = nt.nfl_team_id
+          WHERE rp.team_id = $1 AND rp.league_id = $2
+          ORDER BY rp.roster_player_id`,
+          [teamId, leagueId]
         );
 
-        const slots = slotsResult.rows.map((row) => ({
-          slot: row.slot,
-          player: row.player_id ? {
-            id: row.player_id,
+        // Map roster players to slots (for now, use roster_player_id as slot position)
+        const slots = rosterResult.rows.map((row, index) => ({
+          slot: index + 1, // Use 1-indexed slot position
+          player: row.nfl_player_id ? {
+            id: row.nfl_player_id.toString(),
             name: row.name,
             position: row.position,
-            team: row.team,
-            avatar: row.avatar_sprite_key ? {
-              spriteKey: row.avatar_sprite_key,
-              frame: row.avatar_frame || 0,
-            } : null,
+            team: row.team_name || '',
+            avatar: {
+              spriteKey: 'player_avatar',
+              frame: row.nfl_player_id % 10, // Use player_id modulo to get a sprite frame
+            },
           } : null,
         }));
 
         return {
-          id: roster.id,
-          userId: roster.user_id,
+          id: `team-${teamId}`,
+          userId,
           slots,
         };
       } catch (error) {
@@ -72,4 +79,3 @@ export const resolvers = {
     },
   },
 };
-

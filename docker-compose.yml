@@ -1,24 +1,4 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: locker-room-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: lockerroom
-      POSTGRES_PASSWORD: lockerroom_dev
-      POSTGRES_DB: lockerroom
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lockerroom"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   graphql:
     build:
       context: ./apps/graphql
@@ -29,16 +9,12 @@ services:
       - "4001:4000"
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://lockerroom:lockerroom_dev@postgres:5432/lockerroom
+      DATABASE_URL: postgresql://postgres:secret@host.docker.internal:5432/clubhouse
       PORT: 4000
-    depends_on:
-      postgres:
-        condition: service_healthy
     volumes:
       - ./apps/graphql:/app
       - /app/node_modules
-    command: sh -c "npm run db:migrate && npm run dev"
-
-volumes:
-  postgres_data:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: npm run dev
 
