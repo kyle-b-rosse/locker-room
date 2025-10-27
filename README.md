@@ -7,7 +7,7 @@ A fantasy football locker room built with React + Vite + Phaser 3, featuring Apo
 - **Frontend**: React 19 + Vite + Tailwind CSS v4
 - **Game Engine**: Phaser 3
 - **Backend**: Apollo GraphQL Server
-- **Database**: PostgreSQL
+- **Database**: Clubhouse-API PostgreSQL (shared database)
 - **Auth**: Clerk
 - **State Management**: Zustand
 - **Infrastructure**: Docker Compose
@@ -29,22 +29,31 @@ git clone https://github.com/kyle-b-rosse/locker-room.git
 cd locker-room
 ```
 
-2. **Start the database and GraphQL server**
+2. **Ensure clubhouse-api is running**
+
+The locker-room app uses the database from the clubhouse-api project. Make sure clubhouse-api is running first:
 
 ```bash
+# In your clubhouse-api directory
+docker-compose up -d
+```
+
+3. **Start the GraphQL server**
+
+```bash
+# In your locker-room directory
 docker-compose up -d
 ```
 
 This will:
-- Start PostgreSQL database on port `5432`
-- Start GraphQL server on port `4000`
-- Run database migrations automatically
+- Connect to clubhouse-api PostgreSQL database on port `5432`
+- Start GraphQL server on port `4001`
 
-3. **Verify GraphQL server is running**
+4. **Verify GraphQL server is running**
 
-Visit http://localhost:4000 to access the GraphQL Playground.
+Visit http://localhost:4001 to access the GraphQL Playground.
 
-4. **Setup the web app**
+5. **Setup the web app**
 
 ```bash
 cd apps/web
@@ -84,9 +93,13 @@ locker-room/
 
 ## Database Schema
 
-- **players**: Stores player data with positions and avatar information
-- **rosters**: User roster definitions
-- **roster_slots**: Links players to specific roster positions (slots 1-10)
+The app connects to the clubhouse-api PostgreSQL database which includes:
+
+- **nfl_player**: NFL player data with positions and team information
+- **player**: League-specific player data linking to nfl_player
+- **roster_player**: User roster definitions linking players to teams
+- **team**: Team data with user_id associations
+- **league**: League information
 
 ## GraphQL API
 
