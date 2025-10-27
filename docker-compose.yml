@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: lockerroom_dev
       POSTGRES_DB: lockerroom
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,7 +26,7 @@ services:
     container_name: locker-room-graphql
     restart: unless-stopped
     ports:
-      - "4000:4000"
+      - "4001:4000"
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://lockerroom:lockerroom_dev@postgres:5432/lockerroom
