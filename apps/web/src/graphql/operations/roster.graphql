@@ -1,0 +1,15 @@
+query Roster($userId: ID!) {
+  roster(userId: $userId) {
+    id
+    slots {
+      slot
+      player {
+        id
+        name
+        position
+        team
+        avatar { spriteKey frame }
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+type Query {
+  roster(userId: ID!): Roster
+}
+
+type Roster {
+  id: ID!
+  userId: ID!
+  slots: [RosterSlot!]!
+}
+
+type RosterSlot {
+  slot: Int!
+  player: Player!
+}
+
+type Player {
+  id: ID!
+  name: String!
+  position: String!
+  team: String!
+  avatar: PlayerAvatar
+}
+
+type PlayerAvatar {
+  spriteKey: String!
+  frame: Int!
+}
+
