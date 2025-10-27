@@ -1,12 +1,26 @@
-import './App.css'
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import TeamSelector from './components/TeamSelector';
+import './App.css';
 
-export default function App() {
+// Create Apollo Client instance
+const client = new ApolloClient({
+  uri: import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:4001',
+  cache: new InMemoryCache(),
+});
+
+function App() {
   return (
-    <div className="min-h-screen grid place-items-center bg-slate-900 text-white">
-      <div className="p-6 rounded-2xl bg-slate-800 shadow-xl">
-        <h1 className="text-3xl font-bold">Tailwind v4 + Vite ✅</h1>
-        <p className="opacity-80 mt-2">No init step needed in v4.</p>
+    <ApolloProvider client={client}>
+      <div className="min-h-screen bg-slate-900 text-white py-8">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold text-center mb-8">
+            Fantasy Football Locker Room
+          </h1>
+          <TeamSelector />
+        </div>
       </div>
-    </div>
+    </ApolloProvider>
   );
 }
+
+export default App;

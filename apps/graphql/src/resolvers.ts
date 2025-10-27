@@ -9,6 +9,27 @@ import { Pool } from 'pg';
 export const resolvers = {
   Query: {
     /**
+     * Get all teams from the league
+     */
+    teams: async (_: any, __: any, { db }: { db: Pool }) => {
+      try {
+        const teamsResult = await db.query(
+          `SELECT team_id, user_id, name, league_id FROM team ORDER BY name`
+        );
+
+        return teamsResult.rows.map((row) => ({
+          teamId: row.team_id.toString(),
+          userId: row.user_id,
+          name: row.name,
+          leagueId: row.league_id,
+        }));
+      } catch (error) {
+        console.error('Error fetching teams:', error);
+        throw new Error('Failed to fetch teams');
+      }
+    },
+
+    /**
      * Get a user's roster with all slots and players
      * Uses clubhouse-api database with team_id and roster_player tables
      */

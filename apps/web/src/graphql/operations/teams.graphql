@@ -1,0 +1,9 @@
+query Teams {
+  teams {
+    teamId
+    userId
+    name
+    leagueId
+  }
+}
+

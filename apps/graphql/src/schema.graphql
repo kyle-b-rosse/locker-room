@@ -1,5 +1,6 @@
 type Query {
   roster(userId: ID!): Roster
+  teams: [Team!]!
 }
 
 type Roster {
@@ -24,5 +25,12 @@ type Player {
 type PlayerAvatar {
   spriteKey: String!
   frame: Int!
+}
+
+type Team {
+  teamId: ID!
+  userId: String!
+  name: String!
+  leagueId: String!
 }
 
