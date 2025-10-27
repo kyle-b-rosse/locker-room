@@ -103,6 +103,21 @@ The app connects to the clubhouse-api PostgreSQL database which includes:
 
 ## GraphQL API
 
+### Query: Teams
+
+Get all teams in the league:
+
+```graphql
+query Teams {
+  teams {
+    teamId
+    userId
+    name
+    leagueId
+  }
+}
+```
+
 ### Query: Roster
 
 Get a user's roster with all players:
